@@ -1,0 +1,33 @@
+;; What this occupation's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; README "Robotics premise": a dispensing-support robot performs pill
+;; counting, labeling and inventory tasks under pharmacist supervision
+;; (ISCO 3213 pharmaceutical technicians and assistants). Its physical work:
+;; lifting stock bottles from the shelf to the counting tray, and handling
+;; refrigerated stock outside the fridge while it is labeled.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-3213"
+ :cases
+ [{:id :stock-bottle-to-counting-tray
+   :kind :manipulator
+   :procedure "benchtop arm lifts a stock bottle from the low shelf to the pill-counting tray"
+   :params {:l1-m 0.30 :l2-m 0.25 :m1-kg 2.0 :m2-kg 1.5
+            :from [0.40 0.05] :to [0.15 0.35] :duration-s 1.5 :steps 300}
+   :sweep {:param :payload-kg :values [0.1 0.25 0.5 1.0 2.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 15.0 :basis "estimate: continuous shoulder torque of a ~1 kg-payload benchtop arm"}
+   :boundary {:lo 0.05 :hi 10.0}}
+  {:id :refrigerated-carton-out-of-fridge
+   :kind :thermal
+   :procedure "robot holds a refrigerated medicine carton (6 cm, taken as a 3 cm half-slab to its centre) on the 25 °C labeling bench"
+   :params {:thickness-m 0.03 :conductivity-w-mk 0.5 :density-kg-m3 1000.0 :specific-heat-j-kgk 4000.0
+            :t0-c 5.0 :t-hot-c 25.0 :h-front-w-m2k 10.0 :h-back-w-m2k 0.0 :t-back-ambient-c 5.0
+            :threshold-c 8.0}
+   :sweep {:param :duration-s :values [300.0 600.0 1200.0 1800.0 3600.0]}
+   :quantity :final-back-c
+   :limit {:max 8.0 :basis "USP <659> Packaging and Storage Requirements: refrigerator = 2-8 °C"}
+   :boundary {:lo 60.0 :hi 7200.0}}]}
